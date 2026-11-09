@@ -73,7 +73,6 @@ export function PhotoLightbox({ photo, onClose, onNext, onPrev, canStep, canEdit
           ) : (
             <>
               <h2>{photo.title}</h2>
-              <p>A note from the owner.</p>
               <div className="public-note">{photo.note.trim() || 'No note added for this photo yet.'}</div>
             </>
           )}

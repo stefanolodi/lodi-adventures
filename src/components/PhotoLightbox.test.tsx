@@ -180,3 +180,19 @@ describe('scrolling the note panel', () => {
     expect(container.querySelector('.lightbox-note-panel')).toHaveAttribute('data-lenis-prevent');
   });
 });
+
+describe('the guest note panel', () => {
+  it('shows the badge, the title and the note, with no line about the owner', () => {
+    renderLightbox({ ...portrait, note: 'Sunset from the top.' });
+
+    expect(screen.getByText('Note')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tower' })).toBeInTheDocument();
+    expect(screen.getByText('Sunset from the top.')).toBeInTheDocument();
+    expect(screen.queryByText(/a note from the owner/i)).not.toBeInTheDocument();
+  });
+
+  it('says so when the photo has no note', () => {
+    renderLightbox(portrait);
+    expect(screen.getByText('No note added for this photo yet.')).toBeInTheDocument();
+  });
+});
