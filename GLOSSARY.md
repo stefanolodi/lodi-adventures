@@ -1,4 +1,4 @@
-# Penny Portfolio
+# Lodi Adventures
 
 A private photo archive. One owner keeps albums of photos, and guests look at the albums the owner has not made private.
 
