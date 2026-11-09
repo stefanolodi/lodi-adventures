@@ -1,19 +1,32 @@
 @import 'tailwindcss';
 
+/* The light palette follows the brand board, references/Brand 1.png: Arctic page, Midnight ink, Apres Ski lines. */
 :root {
   font-family: 'Manrope', sans-serif;
-  --bg: oklch(0.91 0.005 255);
-  --bg-ambient-a: oklch(0.7 0.015 255 / 0.2);
-  --bg-ambient-b: oklch(0.62 0.015 245 / 0.16);
-  --panel: oklch(0.96 0.004 255);
-  --ink: oklch(0.28 0.01 255);
-  --ink-soft: oklch(0.48 0.008 255);
-  --brand: oklch(0.42 0.015 255);
-  --brand-deep: oklch(0.31 0.012 255);
+  --bg: #d3d1ce;
+  --bg-ambient-a: rgb(179 183 186 / 0.45);
+  --bg-ambient-b: rgb(108 109 116 / 0.12);
+  --panel: #e9e7e4;
+  --ink: #090f15;
+  /* Apres Ski, darkened until it passes 4.5:1 on the page. */
+  --ink-soft: #55565c;
+  /* Text on a panel that the dark theme draws in white. */
+  --ink-strong: var(--ink);
+  /* Placeholders and the gate's owner link. The dark theme unsets it, so each rule falls back to its faded ink. */
+  --ink-faint: var(--ink-soft);
+  --brand: #6c6d74;
+  --brand-deep: #33363d;
   --accent-orange: #d64218;
   --accent-orange-deep: #b63612;
-  --line: color-mix(in oklch, var(--ink) 14%, var(--bg));
+  /* Apres Ski, so a border passes 3:1 on the page and on a panel. */
+  --line: #6c6d74;
   --shadow: 0 34px 62px -28px color-mix(in oklch, var(--brand-deep) 25%, transparent);
+
+  /* Photos ignore the theme, so whatever sits on one keeps the dark theme's colours in both themes. */
+  --photo-scrim: oklch(0.2 0.01 255);
+  --photo-tint: oklch(0.5 0.012 255);
+  --photo-panel: oklch(0.26 0.01 255);
+  --photo-ink-soft: oklch(0.78 0.008 255);
 }
 
 :root[data-theme='dark'] {
@@ -27,6 +40,8 @@
   --brand-deep: oklch(0.78 0.008 255);
   --accent-orange: #d64218;
   --accent-orange-deep: #e35a34;
+  --ink-strong: white;
+  --ink-faint: initial;
   --line: color-mix(in oklch, var(--ink) 18%, var(--bg));
   --shadow: 0 34px 62px -28px color-mix(in oklch, oklch(0.06 0.02 60) 70%, transparent);
 }
@@ -78,7 +93,7 @@ body {
   text-transform: uppercase;
   font-size: 0.74rem;
   font-weight: 700;
-  color: var(--brand-deep);
+  color: var(--photo-ink-soft);
 }
 
 .opening-hero {
@@ -100,7 +115,7 @@ body {
   left: clamp(1rem, 2vw, 1.9rem);
   bottom: clamp(1rem, 2vw, 1.8rem);
   right: clamp(1rem, 2vw, 1.8rem);
-  color: color-mix(in oklch, white 92%, var(--panel));
+  color: color-mix(in oklch, white 92%, var(--photo-panel));
 }
 
 .hero-copy p {
@@ -119,6 +134,11 @@ body {
   margin-top: 1rem;
 }
 
+/* .view-link takes the theme's --brand-deep, and this link sits on the photo. */
+.hero-copy .hero-link {
+  color: var(--photo-ink-soft);
+}
+
 .scroll-hint {
   position: absolute;
   z-index: 3;
@@ -126,14 +146,14 @@ body {
   transform: translateX(-50%);
   bottom: 1.3rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklch, var(--panel) 62%, transparent);
+  border: 1px solid color-mix(in oklch, var(--photo-panel) 62%, transparent);
   padding: 0.52rem 1rem;
-  color: color-mix(in oklch, white 90%, var(--panel));
+  color: color-mix(in oklch, white 90%, var(--photo-panel));
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  background: color-mix(in oklch, var(--bg) 58%, oklch(0.12 0.01 255) 42%);
+  background: color-mix(in oklch, var(--photo-scrim) 58%, oklch(0.12 0.01 255) 42%);
   backdrop-filter: blur(2px);
   transition: transform 200ms ease, opacity 220ms ease;
 }
@@ -261,7 +281,7 @@ body {
   isolation: isolate;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: color-mix(in oklch, var(--bg) 72%, black);
+  background: color-mix(in oklch, var(--photo-scrim) 72%, black);
   contain: paint;
 }
 
@@ -294,8 +314,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, color-mix(in oklch, var(--bg) 70%, black) 0%, transparent 60%),
-    linear-gradient(to right, color-mix(in oklch, var(--brand) 35%, transparent) 0%, transparent 45%);
+    linear-gradient(to top, color-mix(in oklch, var(--photo-scrim) 70%, black) 0%, transparent 60%),
+    linear-gradient(to right, color-mix(in oklch, var(--photo-tint) 35%, transparent) 0%, transparent 45%);
   pointer-events: none;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -326,8 +346,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in oklch, var(--accent-orange) 75%, var(--panel));
-  background: color-mix(in oklch, black 45%, var(--panel));
+  border: 1px solid color-mix(in oklch, var(--accent-orange) 75%, var(--photo-panel));
+  background: color-mix(in oklch, black 45%, var(--photo-panel));
   color: color-mix(in oklch, white 90%, var(--accent-orange));
   backdrop-filter: blur(4px);
 }
@@ -345,7 +365,7 @@ body {
 .click-indicator {
   display: inline-block;
   margin-top: 0.72rem;
-  color: color-mix(in oklch, white 92%, var(--panel));
+  color: color-mix(in oklch, var(--ink-strong) 92%, var(--panel));
   font-size: 0.92rem;
   font-weight: 700;
   opacity: 1;
@@ -388,7 +408,7 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 999px;
   background: transparent;
-  color: color-mix(in oklch, white 88%, var(--panel));
+  color: color-mix(in oklch, var(--ink-strong) 88%, var(--panel));
   transition: transform 200ms ease, background-color 220ms ease, color 220ms ease;
 }
 
@@ -413,8 +433,8 @@ body {
 
 .privacy-toggle {
   margin-top: 0.8rem;
-  border: 1px solid color-mix(in oklch, var(--accent-orange) 70%, var(--panel));
-  background: color-mix(in oklch, var(--panel) 78%, var(--accent-orange) 22%);
+  border: 1px solid color-mix(in oklch, var(--accent-orange) 70%, var(--photo-panel));
+  background: color-mix(in oklch, var(--photo-panel) 78%, var(--accent-orange) 22%);
   color: white;
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
@@ -447,8 +467,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, color-mix(in oklch, var(--bg) 78%, black) 10%, color-mix(in oklch, var(--bg) 55%, transparent) 43%, transparent 75%),
-    linear-gradient(to right, color-mix(in oklch, var(--brand) 30%, transparent), transparent 58%);
+    linear-gradient(to top, color-mix(in oklch, var(--photo-scrim) 78%, black) 10%, color-mix(in oklch, var(--photo-scrim) 55%, transparent) 43%, transparent 75%),
+    linear-gradient(to right, color-mix(in oklch, var(--photo-tint) 30%, transparent), transparent 58%);
 }
 
 .album-content {
@@ -972,7 +992,7 @@ body {
 }
 
 .field-input::placeholder {
-  color: color-mix(in oklch, var(--ink-soft) 55%, transparent);
+  color: var(--ink-faint, color-mix(in oklch, var(--ink-soft) 55%, transparent));
 }
 
 .login-error {
@@ -1221,7 +1241,7 @@ body {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: color-mix(in oklch, var(--bg) 72%, black);
+  background: color-mix(in oklch, var(--photo-scrim) 72%, black);
 }
 
 .cover-upload-preview img {
@@ -1432,7 +1452,7 @@ body {
 .upload-file-thumb {
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: color-mix(in oklch, var(--bg) 72%, black);
+  background: color-mix(in oklch, var(--photo-scrim) 72%, black);
   position: relative;
 }
 
@@ -1813,7 +1833,7 @@ body {
 }
 
 .gate-input::placeholder {
-  color: color-mix(in oklch, var(--ink-soft) 50%, transparent);
+  color: var(--ink-faint, color-mix(in oklch, var(--ink-soft) 50%, transparent));
   letter-spacing: 0.02em;
 }
 
@@ -1859,7 +1879,7 @@ body {
   margin-top: 1.25rem;
   text-align: center;
   font-size: 0.8125rem;
-  color: color-mix(in oklch, var(--ink) 45%, transparent);
+  color: var(--ink-faint, color-mix(in oklch, var(--ink) 45%, transparent));
   text-decoration: none;
   transition: color 160ms ease;
 }
