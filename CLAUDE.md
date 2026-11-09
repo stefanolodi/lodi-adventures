@@ -1,4 +1,4 @@
-# Penny Portfolio
+# Lodi Adventures
 
 A private, personal photo portfolio app. The owner browses and curates their photo albums; guests view shared content in read-only mode. No social features — purely a memory archive.
 
@@ -10,7 +10,7 @@ A private, personal photo portfolio app. The owner browses and curates their pho
 - **@tanstack/react-query** for reading and writing Supabase data
 - **Supabase** (`@supabase/supabase-js`) for the database and the owner's sign-in
 - **Cloudinary** for photo files
-- **Vercel** hosts the Vite build and the functions in `api/`
+- **Vercel** hosts the Vite build and the functions in `api/`, as the `lodi-adventures` project at lodiadventures.com
 - **@dnd-kit** (core + sortable + utilities) for drag-and-drop reordering
 - **Lenis** for smooth scroll (`window.__lenis` global)
 - **lucide-react** for icons
@@ -123,7 +123,7 @@ Design references are in `references/`:
 
 ### Issue tracker
 
-Issues live in GitHub Issues on `stefanolodi/awesome-photo-portfolio`, managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues on `stefanolodi/lodi-adventures`, managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

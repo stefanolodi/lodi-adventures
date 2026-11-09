@@ -1,4 +1,4 @@
-# Coding standards: awesome-photo-portfolio
+# Coding standards: lodi-adventures
 
 A rule here is one sentence and a pointer. If it needs an argument, the argument is an ADR. An amendment goes in the ADR, never here. `/code-review` and `afk-code-review` judge every change against this file.
 
