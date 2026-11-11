@@ -23,7 +23,7 @@ A private, personal photo portfolio app. The owner browses and curates their pho
 
 ## Architecture
 
-The browser reads and writes the `albums` and `photos` tables in Supabase directly, with the public anon key. Supabase row-level security hides private albums from guests and lets only the owner write. The client filter only shapes the UI. Photo files live in Cloudinary. The browser uploads a photo straight to Cloudinary with a signature from `api/sign-cloudinary-upload`, and `api/delete-cloudinary-asset` deletes a list of them. Both functions hold the Cloudinary secret and check the owner's user id in `api/_lib/authorizeOwner.ts`.
+The browser reads and writes the `albums` and `photos` tables in Supabase directly, with the public anon key. Supabase row-level security shows public albums to guests and the owner, private albums to the owner only, and nothing to strangers. It lets only the owner write. The client filter only shapes the UI. Photo files live in Cloudinary. The browser uploads a photo straight to Cloudinary with a signature from `api/sign-cloudinary-upload`, and `api/delete-cloudinary-asset` deletes a list of them. Both functions hold the Cloudinary secret and check the owner's user id in `api/_lib/authorizeOwner.ts`.
 
 The reasons for these choices are in `docs/adr/README.md`.
 
