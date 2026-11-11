@@ -65,11 +65,11 @@ The owner sees private albums, creates, edits and deletes albums, switches an al
 
 ### Gate
 
-`GateLock` in `App.tsx` covers every page except `/login`. A guest unlocks it with `VITE_GUEST_PASSWORD`, and `sessionStorage` keeps it unlocked for the tab. The owner skips it. The password ships in the bundle, so the gate keeps strangers out and protects nothing. See ADR 0001.
+`GateLock` in `App.tsx` covers every page except `/login`, and the owner skips it. On submit, `unlockAsGuest` in `AuthProvider` signs the visitor in as an anonymous Supabase user and calls `claim_guest` with the password, which Supabase checks against a bcrypt hash. A returning guest keeps their session, and `is_guest()` lets them past without the gate. See ADR 0005.
 
 ### Environment variables
 
-- Client: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_OWNER_USER_ID`, `VITE_GUEST_PASSWORD`.
+- Client: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_OWNER_USER_ID`.
 - Functions in `api/`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `OWNER_USER_ID`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_CLOUD_NAME` (falls back to `VITE_CLOUDINARY_CLOUD_NAME`).
 - Supabase CLI, for `supabase link` and `supabase db pull` on the owner's Mac: `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`. GitHub Actions reads them, and `SUPABASE_ACCESS_TOKEN`, from repo secrets.
 

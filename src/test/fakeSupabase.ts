@@ -77,9 +77,65 @@ class FakeQuery implements PromiseLike<Result> {
   }
 }
 
+export type FakeSession = { access_token: string; user: { id: string; is_anonymous: boolean } };
+
+type AuthCall = 'getSession' | 'signInAnonymously' | 'signOut' | 'claim_guest' | 'is_guest';
+
+// Stands in for Supabase Auth and the guest tables in the private schema. A call named in failing
+// answers with an error, or rejects for getSession. A call named in stalled never answers. A call
+// named in held reads its answer at once and delivers it when the promise resolves, like a slow
+// response. calls logs each auth call and guest RPC, with the scope after a colon for signOut.
+export type FakeAuth = {
+  session: FakeSession | null;
+  guestPassword: string;
+  guests: Set<string>;
+  wrongAttempts: Map<string, number>;
+  failing: Set<AuthCall>;
+  stalled: Set<AuthCall>;
+  held: Map<AuthCall, Promise<void>>;
+  calls: string[];
+};
+
+export function fakeAuth(overrides: Partial<FakeAuth> = {}): FakeAuth {
+  return {
+    session: { access_token: 'owner-token', user: { id: 'owner', is_anonymous: false } },
+    guestPassword: 'letmein',
+    guests: new Set(),
+    wrongAttempts: new Map(),
+    failing: new Set(),
+    stalled: new Set(),
+    held: new Map(),
+    calls: [],
+    ...overrides,
+  };
+}
+
+type AuthListener = (event: 'SIGNED_IN' | 'SIGNED_OUT', session: FakeSession | null) => void;
+
 // A table named in failingReads answers every select with an error, the way a dropped
 // connection or a denying policy would.
-export function fakeSupabase(db: FakeDatabase, failingReads: Set<string> = new Set()) {
+export function fakeSupabase(db: FakeDatabase, failingReads: Set<string> = new Set(), auth: FakeAuth = fakeAuth()) {
+  const listeners = new Set<AuthListener>();
+
+  // Records the call, then holds it forever when the test stalls it.
+  function answer<T>(call: AuthCall, label: string, result: () => T): Promise<T> {
+    auth.calls.push(label);
+    if (auth.stalled.has(call)) return new Promise<T>(() => {});
+    const release = auth.held.get(call);
+    if (release) {
+      const early = Promise.resolve().then(result);
+      return release.then(() => early);
+    }
+    return Promise.resolve().then(result);
+  }
+
+  function setSession(event: 'SIGNED_IN' | 'SIGNED_OUT', session: FakeSession | null) {
+    auth.session = session;
+    listeners.forEach((listener) => listener(event, session));
+  }
+
+  const failure = (call: AuthCall) => ({ message: `${call} failed` });
+
   return {
     from: (table: string) => {
       const rows = (db[table] ??= []);
@@ -107,12 +163,66 @@ export function fakeSupabase(db: FakeDatabase, failingReads: Set<string> = new S
         return Promise.resolve({ data: null, error: null });
       }
       if (name === 'delete_album') return Promise.resolve(deleteAlbum(db, args.album_id));
+      if (name === 'is_guest') {
+        return answer('is_guest', 'is_guest', () =>
+          auth.failing.has('is_guest')
+            ? { data: null, error: failure('is_guest') }
+            : { data: !!auth.session && auth.guests.has(auth.session.user.id), error: null }
+        );
+      }
+      if (name === 'claim_guest') {
+        return answer('claim_guest', 'claim_guest', () =>
+          auth.failing.has('claim_guest')
+            ? { data: null, error: failure('claim_guest') }
+            : claimGuest(auth, args.password)
+        );
+      }
       return Promise.resolve({ data: null, error: { message: `No function ${name}` } });
     },
     auth: {
-      getSession: () => Promise.resolve({ data: { session: { access_token: 'owner-token' } }, error: null }),
+      getSession: () =>
+        answer('getSession', 'getSession', () => {
+          if (auth.failing.has('getSession')) throw new Error('storage unavailable');
+          return { data: { session: auth.session }, error: null };
+        }),
+      onAuthStateChange: (listener: AuthListener) => {
+        listeners.add(listener);
+        return { data: { subscription: { unsubscribe: () => listeners.delete(listener) } } };
+      },
+      signInAnonymously: () =>
+        answer('signInAnonymously', 'signInAnonymously', () => {
+          if (auth.failing.has('signInAnonymously')) {
+            return { data: { session: null, user: null }, error: failure('signInAnonymously') };
+          }
+          // Numbered from the log, so the ids restart whenever a test resets auth.
+          const n = auth.calls.filter((call) => call === 'signInAnonymously').length;
+          const session = { access_token: `anon-token-${n}`, user: { id: `anon-${n}`, is_anonymous: true } };
+          setSession('SIGNED_IN', session);
+          return { data: { session, user: session.user }, error: null };
+        }),
+      signOut: ({ scope = 'global' }: { scope?: 'global' | 'local' | 'others' } = {}) =>
+        answer('signOut', `signOut:${scope}`, () => {
+          if (auth.failing.has('signOut')) return { error: failure('signOut') };
+          setSession('SIGNED_OUT', null);
+          return { error: null };
+        }),
     },
   };
+}
+
+// Mirrors claim_guest in supabase/migrations/20261111082945_guest_access.sql.
+function claimGuest(auth: FakeAuth, password: unknown): Result {
+  const userId = auth.session?.user.id;
+  if (!userId) return { data: null, error: { message: 'claim_guest needs a signed-in user' } };
+  if (auth.guests.has(userId)) return { data: 'guest', error: null };
+  const wrong = auth.wrongAttempts.get(userId) ?? 0;
+  if (wrong >= 5) return { data: 'locked', error: null };
+  if (password === auth.guestPassword) {
+    auth.guests.add(userId);
+    return { data: 'guest', error: null };
+  }
+  auth.wrongAttempts.set(userId, wrong + 1);
+  return { data: 'wrong', error: null };
 }
 
 function deleteAlbum(db: FakeDatabase, albumId: unknown): Result {
