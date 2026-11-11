@@ -74,6 +74,10 @@ _Avoid_: Horizontal photo
 The check in front of every page that asks for the guest password. It keeps strangers out of public albums.
 _Avoid_: Lock, login, guest login
 
+**Gate backdrop**:
+The blurred image behind the gate. It is a 40-pixel copy of the featured album's cover, or of the first public album's cover when the featured album is private, and the only part of the archive a stranger sees.
+_Avoid_: Gate background, hero blur
+
 **Guest password**:
 The one password the owner gives to everyone they want as a guest. Changing it ends every guest's access.
 _Avoid_: Gate password, access code, shared password

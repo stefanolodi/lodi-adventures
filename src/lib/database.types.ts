@@ -97,6 +97,27 @@ export type Database = {
         }
         Relationships: []
       }
+      gate_backdrop: {
+        Row: {
+          id: boolean
+          image: string
+          source_cover_url: string
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          image: string
+          source_cover_url: string
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          image?: string
+          source_cover_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       photos: {
         Row: {
           album_id: string
@@ -155,6 +176,7 @@ export type Database = {
       allow_only_anonymous_signup: { Args: { event: Json }; Returns: Json }
       claim_guest: { Args: { password: string }; Returns: string }
       delete_album: { Args: { album_id: string }; Returns: string[] }
+      gate_backdrop: { Args: never; Returns: string }
       is_guest: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       reorder_albums: { Args: { updates: Json }; Returns: undefined }

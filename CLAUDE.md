@@ -66,7 +66,7 @@ The owner sees private albums, creates, edits and deletes albums, switches an al
 
 ### Gate
 
-`GateLock` in `App.tsx` covers every page except `/login`, and the owner skips it. On submit, `unlockAsGuest` in `AuthProvider` signs the visitor in as an anonymous Supabase user and calls `claim_guest` with the password, which Supabase checks against a bcrypt hash. A returning guest keeps their session, and `is_guest()` lets them past without the gate. See ADR 0005.
+`GateLock` in `App.tsx` covers every page except `/login`, and the owner skips it. Behind it a stranger sees the gate backdrop, a 40-pixel copy of the featured album's cover that the owner's browser keeps current with `useSyncGateBackdrop`. See ADR 0006. On submit, `unlockAsGuest` in `AuthProvider` signs the visitor in as an anonymous Supabase user and calls `claim_guest` with the password, which Supabase checks against a bcrypt hash. A returning guest keeps their session, and `is_guest()` lets them past without the gate. See ADR 0005.
 
 ### Environment variables
 

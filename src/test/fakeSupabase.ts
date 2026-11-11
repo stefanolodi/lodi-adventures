@@ -153,6 +153,21 @@ export function fakeSupabase(db: FakeDatabase, failingReads: Set<string> = new S
             return new FakeQuery(matched);
           },
         }),
+        // Matches on id, the primary key of every table the hooks upsert into.
+        upsert: (row: Row) => {
+          const existing = rows.find((other) => other.id === row.id);
+          if (existing) Object.assign(existing, row);
+          else rows.push({ ...row });
+          return new FakeQuery([existing ?? row]);
+        },
+        delete: () => ({
+          eq: (column: string, value: unknown) => {
+            const kept = rows.filter((row) => row[column] !== value);
+            const deleted = rows.filter((row) => row[column] === value);
+            rows.splice(0, rows.length, ...kept);
+            return new FakeQuery(deleted);
+          },
+        }),
       };
     },
     // Mirrors the SQL functions in supabase/migrations/.
@@ -163,6 +178,7 @@ export function fakeSupabase(db: FakeDatabase, failingReads: Set<string> = new S
         return Promise.resolve({ data: null, error: null });
       }
       if (name === 'delete_album') return Promise.resolve(deleteAlbum(db, args.album_id));
+      if (name === 'gate_backdrop') return Promise.resolve({ data: db.gate_backdrop?.[0]?.image ?? null, error: null });
       if (name === 'is_guest') {
         return answer('is_guest', 'is_guest', () =>
           auth.failing.has('is_guest')
