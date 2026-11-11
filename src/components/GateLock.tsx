@@ -43,52 +43,50 @@ export function GateLock({ children }: { children: ReactNode }) {
     }
   };
 
+  // Nothing under the gate mounts while it shows, so a locked page starts no query and loads no photo. See ADR 0001.
+  if (!showGate) return children;
+
   return (
-    <>
-      {children}
-      {showGate && (
-        <div
-          className={`gate-overlay${unlocking ? ' is-unlocking' : ''}`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Password gate"
-        >
-          <div className={`gate-card${shaking ? ' is-shaking' : ''}`}>
-            <div className="gate-accent-bar" />
-            <p className="gate-eyebrow">Private Archive</p>
-            <h1 className="gate-heading">Enter to view</h1>
-            <p className="gate-sub">
-              This collection is private. Enter the access password to continue.
-            </p>
-            <form className="gate-form" onSubmit={handleSubmit} noValidate>
-              <div className={`gate-input-wrap${shaking ? ' has-error' : ''}`}>
-                <input
-                  className="gate-input"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoFocus
-                  autoComplete="current-password"
-                  aria-invalid={shaking}
-                  aria-describedby={shaking ? 'gate-error' : undefined}
-                />
-                {shaking && (
-                  <p className="gate-error" id="gate-error" role="alert">
-                    Incorrect password
-                  </p>
-                )}
-              </div>
-              <button type="submit" className="gate-submit">
-                Enter
-              </button>
-            </form>
-            <Link to="/login" className="gate-owner-link">
-              Owner login
-            </Link>
+    <div
+      className={`gate-overlay${unlocking ? ' is-unlocking' : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Password gate"
+    >
+      <div className={`gate-card${shaking ? ' is-shaking' : ''}`}>
+        <div className="gate-accent-bar" />
+        <p className="gate-eyebrow">Private Archive</p>
+        <h1 className="gate-heading">Enter to view</h1>
+        <p className="gate-sub">
+          This collection is private. Enter the access password to continue.
+        </p>
+        <form className="gate-form" onSubmit={handleSubmit} noValidate>
+          <div className={`gate-input-wrap${shaking ? ' has-error' : ''}`}>
+            <input
+              className="gate-input"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+              autoComplete="current-password"
+              aria-invalid={shaking}
+              aria-describedby={shaking ? 'gate-error' : undefined}
+            />
+            {shaking && (
+              <p className="gate-error" id="gate-error" role="alert">
+                Incorrect password
+              </p>
+            )}
           </div>
-        </div>
-      )}
-    </>
+          <button type="submit" className="gate-submit">
+            Enter
+          </button>
+        </form>
+        <Link to="/login" className="gate-owner-link">
+          Owner login
+        </Link>
+      </div>
+    </div>
   );
 }
