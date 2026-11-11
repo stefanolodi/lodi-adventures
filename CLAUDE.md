@@ -85,6 +85,7 @@ npm run test:watch
 npm run screenshot
 npm run lint      # eslint, fails on any warning
 npm run verify    # lint, then build, then test. CI runs the same
+supabase test db  # pgTAP tests in supabase/tests/, on a running local stack
 ```
 
 ## Styling conventions

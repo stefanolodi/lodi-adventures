@@ -152,7 +152,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allow_only_anonymous_signup: { Args: { event: Json }; Returns: Json }
+      claim_guest: { Args: { password: string }; Returns: string }
       delete_album: { Args: { album_id: string }; Returns: string[] }
+      is_guest: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
       reorder_albums: { Args: { updates: Json }; Returns: undefined }
       reorder_photos: { Args: { updates: Json }; Returns: undefined }
