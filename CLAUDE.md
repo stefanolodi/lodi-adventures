@@ -46,6 +46,7 @@ api/
   sign-cloudinary-upload.ts
   delete-cloudinary-asset.ts
   _lib/authorizeOwner.ts
+scripts/           # One-off scripts the owner runs on the Mac, such as rename-photos.ts
 supabase/
   config.toml      # Local stack settings for the Supabase CLI
   migrations/      # The schema. CI applies new files on merge to main
@@ -72,6 +73,7 @@ The owner sees private albums, creates, edits and deletes albums, switches an al
 - Client: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_OWNER_USER_ID`.
 - Functions in `api/`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `OWNER_USER_ID`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_CLOUD_NAME` (falls back to `VITE_CLOUDINARY_CLOUD_NAME`).
 - Supabase CLI, for `supabase link` and `supabase db pull` on the owner's Mac: `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`. GitHub Actions reads them, and `SUPABASE_ACCESS_TOKEN`, from repo secrets.
+- Scripts in `scripts/`, on the owner's Mac only: `SUPABASE_SERVICE_ROLE_KEY`. It never goes to Vercel and never gets a `VITE_` prefix.
 
 `.env.example` lists every variable with a comment saying what it is.
 
@@ -83,6 +85,7 @@ npm run build     # tsc + vite build
 npm run test      # vitest run (single pass)
 npm run test:watch
 npm run screenshot
+npm run rename-photos  # dry run of the Cloudinary rename. Add -- --apply to rename. See ADR 0005
 npm run lint      # eslint, fails on any warning
 npm run verify    # lint, then build, then test. CI runs the same
 supabase test db  # pgTAP tests in supabase/tests/, on a running local stack
