@@ -28,7 +28,7 @@ Cloudinary serves an `upload` asset to anyone who has its URL, so a URL read whi
 
 A guest who has not visited for 90 to 97 days sees the gate again, because the cleanup runs once a week.
 
-While the gate shows, `GateLock` mounts nothing behind it, so a stranger loads no album data and no photos. Removing the overlay in dev tools reveals an empty page. The one exception is the gate backdrop, a 64-pixel copy of one public cover. See ADR 0006.
+While the gate shows, `GateLock` mounts nothing behind it, so a stranger loads no album data and no photos. Removing the overlay in dev tools reveals an empty page. The one exception is the gate backdrop, a 96-pixel copy of one public cover. See ADR 0006.
 
 ## Owner snippets
 

@@ -75,7 +75,7 @@ The check in front of every page that asks for the guest password. It keeps stra
 _Avoid_: Lock, login, guest login
 
 **Gate backdrop**:
-The blurred image behind the gate. It is a 64-pixel copy of the featured album's cover, or of the first public album's cover when the featured album is private, and the only part of the archive a stranger sees.
+The blurred image behind the gate. It is a 96-pixel copy of the featured album's cover, or of the first public album's cover when the featured album is private, and the only part of the archive a stranger sees.
 _Avoid_: Gate background, hero blur
 
 **Guest password**:

@@ -30,7 +30,7 @@ vi.mock('../lib/fetchGateBackdropImage', () => ({
 }));
 
 const cloudinary = (name: string) => `https://res.cloudinary.com/demo/image/upload/${name}.jpg`;
-const tiny = (name: string) => `https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,ar_16:10,w_64,q_60,f_jpg/${name}.jpg`;
+const tiny = (name: string) => `https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,ar_16:10,w_96,q_60,f_jpg/${name}.jpg`;
 
 function album(id: string, order: number, { isPrivate = false, isFeatured = false } = {}) {
   return {
@@ -67,7 +67,7 @@ function renderSync(isOwner: boolean) {
 const stored = () => db.gate_backdrop?.[0];
 
 describe('useSyncGateBackdrop', () => {
-  it('writes a 64-pixel copy of the featured album cover in the owner browser', async () => {
+  it('writes a 96-pixel copy of the featured album cover in the owner browser', async () => {
     renderSync(true);
     await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('featured')));
     expect(fetched).toEqual([tiny('featured')]);

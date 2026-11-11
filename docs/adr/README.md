@@ -5,4 +5,4 @@
 - [0003](0003-eslint-with-type-checked-rules-lints-src-and-api.md): ESLint with type-checked rules lints `src` and `api`, and the findings that predate it sit in `eslint-suppressions.json`.
 - [0004](0004-ci-applies-supabase-migrations-on-merge.md): the schema lives in `supabase/migrations/`, CI applies it on merge to `main`, and agents never push to the live database.
 - [0005](0005-guests-are-anonymous-users-who-know-the-guest-password.md): a guest is an anonymous Supabase user who has entered the guest password, and only `claim_guest` adds one.
-- [0006](0006-the-gate-shows-a-64-pixel-copy-of-the-featured-album-cover.md): the gate shows a 64-pixel copy of the featured album's cover, which the owner's browser writes to `gate_backdrop` and anyone reads through `gate_backdrop()`.
+- [0006](0006-the-gate-shows-a-96-pixel-copy-of-the-featured-album-cover.md): the gate shows a 96-pixel copy of the featured album's cover, which the owner's browser writes to `gate_backdrop` and anyone reads through `gate_backdrop()`.
