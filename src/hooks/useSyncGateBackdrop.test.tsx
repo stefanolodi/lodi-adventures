@@ -30,7 +30,7 @@ vi.mock('../lib/fetchGateBackdropImage', () => ({
 }));
 
 const cloudinary = (name: string) => `https://res.cloudinary.com/demo/image/upload/${name}.jpg`;
-const tiny = (name: string) => `https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,ar_16:10,w_40,q_60,f_jpg/${name}.jpg`;
+const tiny = (name: string) => `https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,ar_16:10,w_64,q_60,f_jpg/${name}.jpg`;
 
 function album(id: string, order: number, { isPrivate = false, isFeatured = false } = {}) {
   return {
@@ -67,9 +67,9 @@ function renderSync(isOwner: boolean) {
 const stored = () => db.gate_backdrop?.[0];
 
 describe('useSyncGateBackdrop', () => {
-  it('writes a 40-pixel copy of the featured album cover in the owner browser', async () => {
+  it('writes a 64-pixel copy of the featured album cover in the owner browser', async () => {
     renderSync(true);
-    await waitFor(() => expect(stored()?.source_cover_url).toBe(cloudinary('featured')));
+    await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('featured')));
     expect(fetched).toEqual([tiny('featured')]);
     expect(stored()?.image).toBe(`data:image/jpeg;base64,${btoa(tiny('featured'))}`);
   });
@@ -77,7 +77,7 @@ describe('useSyncGateBackdrop', () => {
   it('uses the cover a guest sees first when the featured album is private', async () => {
     db.albums = [album('private-featured', 0, { isPrivate: true, isFeatured: true }), album('public', 1)];
     renderSync(true);
-    await waitFor(() => expect(stored()?.source_cover_url).toBe(cloudinary('public')));
+    await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('public')));
     expect(fetched).toEqual([tiny('public')]);
   });
 
@@ -91,22 +91,30 @@ describe('useSyncGateBackdrop', () => {
 
   it('follows the featured album when the owner features another one', async () => {
     renderSync(true);
-    await waitFor(() => expect(stored()?.source_cover_url).toBe(cloudinary('featured')));
+    await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('featured')));
 
     db.albums = [album('first', 0, { isFeatured: true }), album('featured', 1)];
     await act(() => queryClient.invalidateQueries({ queryKey: ['albums'] }));
 
-    await waitFor(() => expect(stored()?.source_cover_url).toBe(cloudinary('first')));
+    await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('first')));
     expect(fetched).toEqual([tiny('featured'), tiny('first')]);
   });
 
   it('leaves a backdrop that already matches the cover alone', async () => {
-    db.gate_backdrop = [{ id: true, image: 'data:image/jpeg;base64,AA==', source_cover_url: cloudinary('featured') }];
+    db.gate_backdrop = [{ id: true, image: 'data:image/jpeg;base64,AA==', source_cover_url: tiny('featured') }];
     renderSync(true);
-    await waitFor(() => expect(queryClient.getQueryData(['gate-backdrop-source'])).toBe(cloudinary('featured')));
+    await waitFor(() => expect(queryClient.getQueryData(['gate-backdrop-source'])).toBe(tiny('featured')));
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     expect(fetched).toEqual([]);
     expect(stored()?.image).toBe('data:image/jpeg;base64,AA==');
+  });
+
+  it('rebuilds a backdrop stored before the size changed', async () => {
+    // The row #76 wrote held the plain cover URL and a 40-pixel image.
+    db.gate_backdrop = [{ id: true, image: 'data:image/jpeg;base64,AA==', source_cover_url: cloudinary('featured') }];
+    renderSync(true);
+    await waitFor(() => expect(stored()?.source_cover_url).toBe(tiny('featured')));
+    expect(fetched).toEqual([tiny('featured')]);
   });
 
   it('reads and writes nothing outside the owner browser', async () => {

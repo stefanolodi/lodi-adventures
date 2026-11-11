@@ -9,17 +9,19 @@ import { GATE_BACKDROP_KEY } from './useGateBackdrop';
 
 const GATE_BACKDROP_SOURCE_KEY = ['gate-backdrop-source'] as const;
 
-async function writeGateBackdrop(cover: string | null): Promise<void> {
-  const src = cover === null ? null : gateBackdropSrc(cover);
-  if (cover === null || src === null) {
+// src is the small Cloudinary URL, null when there is no backdrop to show.
+async function writeGateBackdrop(src: string | null): Promise<void> {
+  if (src === null) {
     const { error } = await supabase.from('gate_backdrop').delete().eq('id', true);
     if (error) throw error;
     return;
   }
   const image = await fetchGateBackdropImage(src);
+  // source_cover_url holds the URL with its transformation, so a change to the size in
+  // gateBackdropSrc no longer matches the stored row and rebuilds it.
   const { error } = await supabase
     .from('gate_backdrop')
-    .upsert({ id: true, image, source_cover_url: cover, updated_at: new Date().toISOString() });
+    .upsert({ id: true, image, source_cover_url: src, updated_at: new Date().toISOString() });
   if (error) throw error;
 }
 
@@ -30,7 +32,7 @@ async function writeGateBackdrop(cover: string | null): Promise<void> {
 export function useSyncGateBackdrop(isOwner: boolean): void {
   const queryClient = useQueryClient();
   const { data: albums } = useAlbums({ enabled: isOwner });
-  const { data: storedCover } = useQuery({
+  const { data: storedSrc } = useQuery({
     queryKey: GATE_BACKDROP_SOURCE_KEY,
     enabled: isOwner,
     queryFn: async () => {
@@ -41,21 +43,23 @@ export function useSyncGateBackdrop(isOwner: boolean): void {
   });
   const { mutate } = useMutation({
     mutationFn: writeGateBackdrop,
-    onSuccess: (_data, cover) => {
-      queryClient.setQueryData(GATE_BACKDROP_SOURCE_KEY, cover);
+    onSuccess: (_data, src) => {
+      queryClient.setQueryData(GATE_BACKDROP_SOURCE_KEY, src);
       void queryClient.invalidateQueries({ queryKey: GATE_BACKDROP_KEY });
     },
   });
 
-  // undefined until the albums load. null when no album is public, so the gate shows no image.
-  const cover = isOwner && albums ? (chooseHeroAlbum(albums, false)?.cover ?? null) : undefined;
-  // One try per cover, so a failed write does not repeat on every render. The next load tries again.
+  // undefined until the albums load. null when no album is public or the cover is outside
+  // Cloudinary, so the gate shows no image.
+  const hero = isOwner && albums ? chooseHeroAlbum(albums, false) : undefined;
+  const src = !isOwner || !albums ? undefined : hero ? gateBackdropSrc(hero.cover) : null;
+  // One try per source, so a failed write does not repeat on every render. The next load tries again.
   const tried = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    if (cover === undefined || storedCover === undefined || cover === storedCover) return;
-    if (tried.current === cover) return;
-    tried.current = cover;
-    mutate(cover);
-  }, [cover, storedCover, mutate]);
+    if (src === undefined || storedSrc === undefined || src === storedSrc) return;
+    if (tried.current === src) return;
+    tried.current = src;
+    mutate(src);
+  }, [src, storedSrc, mutate]);
 }
