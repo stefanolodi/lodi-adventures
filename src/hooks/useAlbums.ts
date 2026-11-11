@@ -9,9 +9,10 @@ import type { Album } from '../types';
 const ALBUMS_KEY = ['albums'] as const;
 const albumKey = (id: string) => ['album', id] as const;
 
-export function useAlbums() {
+export function useAlbums({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ALBUMS_KEY,
+    enabled,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('albums')

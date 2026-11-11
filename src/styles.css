@@ -1695,6 +1695,23 @@ body {
 
 /* ─── Gate Lock ───────────────────────────────────────────────────────────── */
 
+/* The 40-pixel cover from ADR 0006, stretched under the overlay. The blur smooths its pixels,
+   and the scale pushes the edge the blur fades out past the viewport. */
+.gate-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background-position: center;
+  background-size: cover;
+  filter: blur(24px);
+  transform: scale(1.15);
+  animation: gate-overlay-in 400ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+}
+
+.gate-backdrop.is-unlocking {
+  animation: gate-overlay-out 520ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 .gate-overlay {
   position: fixed;
   inset: 0;

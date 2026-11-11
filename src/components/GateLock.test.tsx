@@ -33,6 +33,7 @@ const anonymous = (id: string) => ({ access_token: `${id}-token`, user: { id, is
 beforeEach(() => {
   Object.assign(auth, fakeAuth({ session: null }));
   reads.length = 0;
+  db.gate_backdrop = [];
   db.albums = [
     {
       id: 'some-album',
@@ -191,6 +192,39 @@ describe('the gate makes a visitor a guest only on submit', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Enter' }));
     await settle();
     expect(callsTo('claim_guest')).toBe(1);
+  });
+});
+
+describe('the gate backdrop', () => {
+  const image = 'data:image/jpeg;base64,/9j/AA==';
+  const backdrop = () => screen.queryByTestId('gate-backdrop');
+
+  it('shows a stranger the backdrop image, and still reads no table and loads no image element', async () => {
+    db.gate_backdrop = [{ id: true, image, source_cover_url: 'https://res.cloudinary.com/demo/image/upload/some-album.jpg' }];
+    renderApp('/');
+    await findGate();
+    await settle();
+
+    expect(backdrop()).toHaveStyle({ backgroundImage: `url("${image}")` });
+    expect(backdrop()).toHaveAttribute('aria-hidden', 'true');
+    expect(reads).toEqual([]);
+    expect(screen.queryAllByRole('img')).toEqual([]);
+  });
+
+  it('shows no backdrop when there is none', async () => {
+    db.gate_backdrop = [];
+    renderApp('/');
+    await findGate();
+    await settle();
+    expect(backdrop()).not.toBeInTheDocument();
+  });
+
+  it('shows no backdrop for a value that is not a base64 JPEG', async () => {
+    db.gate_backdrop = [{ id: true, image: 'https://res.cloudinary.com/demo/image/upload/some-album.jpg', source_cover_url: '' }];
+    renderApp('/');
+    await findGate();
+    await settle();
+    expect(backdrop()).not.toBeInTheDocument();
   });
 });
 
