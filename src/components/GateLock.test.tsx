@@ -59,7 +59,7 @@ beforeEach(() => {
 
 const gate = () => screen.queryByRole('dialog', { name: 'Password gate' });
 
-// Lets the queries a mounted page would start come back, so a page behind the gate would have drawn its images.
+// Waits for the queries a mounted page starts to resolve, so a page behind the gate would have drawn its images by now.
 const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
 // The App renders every route, so a route moved outside GateLock fails here.
