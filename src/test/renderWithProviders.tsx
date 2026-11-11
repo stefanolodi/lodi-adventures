@@ -4,16 +4,18 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthContext, type AuthContextValue } from '../context/AuthContext';
 
-type Options = { path?: string; isOwner?: boolean; auth?: Partial<AuthContextValue> };
+type Options = { path?: string; isOwner?: boolean; isGuest?: boolean; auth?: Partial<AuthContextValue> };
 
-export function renderWithProviders(ui: ReactElement, { path = '/', isOwner = false, auth: authOverrides }: Options = {}) {
+export function renderWithProviders(ui: ReactElement, { path = '/', isOwner = false, isGuest = false, auth: authOverrides }: Options = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const auth: AuthContextValue = {
     session: null,
     isOwner,
+    isGuest,
     isLoading: false,
     signIn: () => Promise.resolve({ error: null }),
     signOut: () => Promise.resolve({ error: null }),
+    unlockAsGuest: () => Promise.resolve('wrong'),
     ...authOverrides,
   };
 

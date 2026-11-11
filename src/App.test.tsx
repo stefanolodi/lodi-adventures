@@ -33,9 +33,8 @@ function photo(id: string, albumId: string, title: string, url: string) {
   return { id, album_id: albumId, title, note: `${title} note`, url, public_id: id, width: null, height: null, display_order: 0 };
 }
 
+// These tests cover a guest past the gate, so a non-owner render passes isGuest. The gate mounts no page behind it.
 beforeEach(() => {
-  // These tests cover a guest past the gate. .env.local may set VITE_GUEST_PASSWORD, and the gate mounts no page behind it.
-  sessionStorage.setItem('penny-gate-unlocked', '1');
   // The private album comes first, so a broken filter would also make it the featured album.
   db.albums = [
     album('private-album', 'Secret party', true, 2019, PRIVATE_COVER, 0),
@@ -58,14 +57,14 @@ async function openLightbox() {
 
 describe('App shell', () => {
   it('renders the owner login link for guests', async () => {
-    renderWithProviders(<App />);
+    renderWithProviders(<App />, { isGuest: true });
     expect(await screen.findByText(/owner login/i)).toBeInTheDocument();
   });
 });
 
 describe('Rule 1: a guest never sees a private album or its photos', () => {
   it('leaves the private album off the home page', async () => {
-    renderWithProviders(<App />);
+    renderWithProviders(<App />, { isGuest: true });
     expect((await screen.findAllByText('Public trip')).length).toBeGreaterThan(0);
     expect(screen.queryByText('Secret party')).not.toBeInTheDocument();
     expect(screen.queryByAltText('Secret party')).not.toBeInTheDocument();
@@ -78,7 +77,7 @@ describe('Rule 1: a guest never sees a private album or its photos', () => {
   });
 
   it('blocks the private album at its own url', async () => {
-    renderWithProviders(<App />, { path: '/album/private-album' });
+    renderWithProviders(<App />, { path: '/album/private-album', isGuest: true });
     expect(await screen.findByRole('heading', { name: 'Private album' })).toBeInTheDocument();
     expect(screen.queryByText('Secret party')).not.toBeInTheDocument();
     expect(screen.queryByAltText('Secret party')).not.toBeInTheDocument();
@@ -93,7 +92,7 @@ describe('Rule 1: a guest never sees a private album or its photos', () => {
 
 describe('Rule 3: only the owner sees the controls that create, edit, reorder or delete', () => {
   it('gives a guest no album controls on the home page', async () => {
-    const { container } = renderWithProviders(<App />);
+    const { container } = renderWithProviders(<App />, { isGuest: true });
     await screen.findAllByText('Public trip');
     expect(screen.queryByRole('button', { name: /new album/i })).not.toBeInTheDocument();
     expect(sortables(container)).toHaveLength(0);
@@ -106,7 +105,7 @@ describe('Rule 3: only the owner sees the controls that create, edit, reorder or
   });
 
   it('gives a guest no photo or album controls on an album page', async () => {
-    const { container } = renderWithProviders(<App />, { path: '/album/public-album' });
+    const { container } = renderWithProviders(<App />, { path: '/album/public-album', isGuest: true });
     await openLightbox();
     for (const name of [/upload photos/i, /edit album/i, /public album/i, /delete photo/i]) {
       expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
@@ -139,7 +138,7 @@ describe('Rule 4: the guest UI has no download control and no link to the origin
   }
 
   it('offers none on the home page', async () => {
-    const { container } = renderWithProviders(<App />);
+    const { container } = renderWithProviders(<App />, { isGuest: true });
     await screen.findAllByText('Public trip');
     expectNoDownload(container);
     fireEvent.click(screen.getByRole('button', { name: 'All Photos' }));
@@ -147,7 +146,7 @@ describe('Rule 4: the guest UI has no download control and no link to the origin
   });
 
   it('offers none on an album page or in its lightbox', async () => {
-    const { container } = renderWithProviders(<App />, { path: '/album/public-album' });
+    const { container } = renderWithProviders(<App />, { path: '/album/public-album', isGuest: true });
     await openLightbox();
     expectNoDownload(container);
   });

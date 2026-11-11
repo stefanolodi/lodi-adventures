@@ -1865,13 +1865,18 @@ body {
   transition: opacity 220ms ease, transform 200ms ease;
 }
 
-.gate-submit:hover {
+.gate-submit:hover:not(:disabled) {
   opacity: 0.85;
   transform: translateY(-1px);
 }
 
-.gate-submit:active {
+.gate-submit:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.gate-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .gate-owner-link {

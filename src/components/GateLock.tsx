@@ -2,46 +2,49 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const GATE_PASSWORD = import.meta.env.VITE_GUEST_PASSWORD as string | undefined;
-const STORAGE_KEY = 'penny-gate-unlocked';
-
-function readStorage(): boolean {
-  try { return sessionStorage.getItem(STORAGE_KEY) === '1'; } catch { return false; }
-}
-function writeStorage() {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, '1');
-  } catch {
-    // With storage blocked the gate still unlocks, and asks again on the next page load.
-  }
-}
+type GateError = 'wrong' | 'error' | null;
 
 export function GateLock({ children }: { children: ReactNode }) {
-  const { isOwner } = useAuth();
+  const { isOwner, isGuest, isLoading, unlockAsGuest } = useAuth();
   const location = useLocation();
 
-  const [unlocked, setUnlocked] = useState(() => !GATE_PASSWORD || readStorage());
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<GateError>(null);
   const [shaking, setShaking] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
   const isLoginPage = location.pathname === '/login';
-  const showGate = !unlocked && !isOwner && !!GATE_PASSWORD && !isLoginPage;
+  // isGuest turns true inside unlockAsGuest, before the submit sees the result, so the overlay
+  // stays up through the submit and its unlock animation.
+  const showGate = !isOwner && !isLoginPage && (!isGuest || submitting || unlocking);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password === GATE_PASSWORD) {
+    if (submitting) return;
+    setSubmitting(true);
+    setError(null);
+    const result = await unlockAsGuest(password);
+    setSubmitting(false);
+
+    if (result === 'guest') {
       setUnlocking(true);
-      setTimeout(() => {
-        writeStorage();
-        setUnlocked(true);
-      }, 520);
-    } else {
+      setTimeout(() => setUnlocking(false), 520);
+      return;
+    }
+    setError(result);
+    if (result === 'wrong') {
       setPassword('');
       setShaking(true);
-      setTimeout(() => setShaking(false), 650);
+      setTimeout(() => {
+        setShaking(false);
+        setError(null);
+      }, 650);
     }
   };
+
+  // A returning guest sees neither the gate nor the page until the guest check answers, so the gate does not flash.
+  if (isLoading && !isLoginPage) return null;
 
   // Nothing under the gate mounts while it shows, so a locked page starts no query and loads no photo. See ADR 0005.
   if (!showGate) return children;
@@ -60,8 +63,8 @@ export function GateLock({ children }: { children: ReactNode }) {
         <p className="gate-sub">
           This collection is private. Enter the access password to continue.
         </p>
-        <form className="gate-form" onSubmit={handleSubmit} noValidate>
-          <div className={`gate-input-wrap${shaking ? ' has-error' : ''}`}>
+        <form className="gate-form" onSubmit={(e) => void handleSubmit(e)} noValidate>
+          <div className={`gate-input-wrap${error ? ' has-error' : ''}`}>
             <input
               className="gate-input"
               type="password"
@@ -70,16 +73,16 @@ export function GateLock({ children }: { children: ReactNode }) {
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
               autoComplete="current-password"
-              aria-invalid={shaking}
-              aria-describedby={shaking ? 'gate-error' : undefined}
+              aria-invalid={error === 'wrong'}
+              aria-describedby={error ? 'gate-error' : undefined}
             />
-            {shaking && (
+            {error && (
               <p className="gate-error" id="gate-error" role="alert">
-                Incorrect password
+                {error === 'wrong' ? 'Incorrect password' : 'Something went wrong. Try again.'}
               </p>
             )}
           </div>
-          <button type="submit" className="gate-submit">
+          <button type="submit" className="gate-submit" disabled={submitting || unlocking}>
             Enter
           </button>
         </form>
