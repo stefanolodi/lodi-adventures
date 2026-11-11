@@ -43,7 +43,7 @@ export function GateLock({ children }: { children: ReactNode }) {
     }
   };
 
-  // Nothing under the gate mounts while it shows, so a locked page starts no query and loads no photo. See ADR 0001.
+  // Nothing under the gate mounts while it shows, so a locked page starts no query and loads no photo. See ADR 0005.
   if (!showGate) return children;
 
   return (

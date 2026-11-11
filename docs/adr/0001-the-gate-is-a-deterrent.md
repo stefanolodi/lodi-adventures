@@ -1,3 +1,5 @@
+Superseded by ADR 0005.
+
 # The gate is a deterrent, not a security boundary
 
 The gate keeps strangers who find the URL from browsing the archive. Its password is `VITE_GUEST_PASSWORD`, which Vite builds into the client bundle, and the unlocked state lives in `sessionStorage`. Anyone who reads the bundle can get past it. We accept that because only the Supabase policies protect private albums (ADR 0002), and a server-checked guest password would mean a guest session to issue and expire for no gain in privacy.

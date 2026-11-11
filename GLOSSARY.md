@@ -11,8 +11,12 @@ The one person who keeps the archive and the only one who can change it.
 _Avoid_: Admin, user, author
 
 **Guest**:
-Anyone looking at the archive who is not the owner. A guest only reads.
+Someone who has entered the guest password. A guest only reads, and only public albums.
 _Avoid_: Visitor, viewer, public user
+
+**Stranger**:
+Anyone who is neither the owner nor a guest. A stranger sees the gate and nothing else.
+_Avoid_: Visitor, anonymous user, public
 
 ### Content
 
@@ -67,5 +71,9 @@ _Avoid_: Horizontal photo
 ### Access
 
 **Gate**:
-The shared password a guest enters before seeing any page. It slows down strangers and does not protect private albums.
+The check in front of every page that asks for the guest password. It keeps strangers out of public albums.
 _Avoid_: Lock, login, guest login
+
+**Guest password**:
+The one password the owner gives to everyone they want as a guest. Changing it ends every guest's access.
+_Avoid_: Gate password, access code, shared password

@@ -26,8 +26,9 @@ Words in these rules are defined in `GLOSSARY.md`.
 1. A guest never sees a private album or any of its photos. The Supabase policies enforce it, and the client filter only shapes the UI. See ADR 0002.
 2. A new album is private until the owner makes it public. See "Key rules" in `CLAUDE.md`.
 3. Only the owner creates, edits, reorders or deletes albums and photos. The Supabase policies and every function in `api/` check the owner's user id, not only that someone is signed in. See ADR 0002.
-4. The guest UI has no download control and no link to the original file. See "Key rules" in `CLAUDE.md` and ADR 0001.
-5. The gate covers every page except `/login`, and the owner skips it. See ADR 0001.
+4. The guest UI has no download control and no link to the original file. See "Key rules" in `CLAUDE.md` and ADR 0005.
+5. The gate covers every page except `/login`, and the owner skips it. See ADR 0005.
+6. Only `claim_guest` adds a guest. Browsers cannot write to the `guests` table or read the guest password hash. See ADR 0005.
 
 ## Database schema
 
@@ -42,7 +43,8 @@ Words in these rules are defined in `GLOSSARY.md`.
 - Tests run on vitest with jsdom and Testing Library. `npm run test` runs them all once.
 - A test sits next to the file it covers, named `<file>.test.ts` or `<file>.test.tsx`.
 - Every test mocks `./lib/supabase` with `vi.mock`, and no test touches the network.
-- Each rule under "Rules that must not regress" has a test that fails when the rule breaks.
+- Database tests are pgTAP files in `supabase/tests/`. `supabase test db` runs them on a running local stack, and `.github/workflows/supabase-tests.yml` runs them on pull requests that touch `supabase/`.
+- Each rule under "Rules that must not regress" has a test that fails when the rule breaks. Rule 6's test is the pgTAP suite.
 
 ## Comments and docs
 
