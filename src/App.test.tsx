@@ -34,6 +34,8 @@ function photo(id: string, albumId: string, title: string, url: string) {
 }
 
 beforeEach(() => {
+  // These tests cover a guest past the gate. .env.local may set VITE_GUEST_PASSWORD, and the gate mounts no page behind it.
+  sessionStorage.setItem('penny-gate-unlocked', '1');
   // The private album comes first, so a broken filter would also make it the featured album.
   db.albums = [
     album('private-album', 'Secret party', true, 2019, PRIVATE_COVER, 0),
