@@ -49,7 +49,7 @@ export function GateLock({ children }: { children: ReactNode }) {
   if (isLoading && !isLoginPage) return null;
 
   // Nothing under the gate mounts while it shows, so a locked page starts no query and loads no photo.
-  // The backdrop is a 64-pixel copy of one cover, held in the database. See ADR 0005 and ADR 0006.
+  // The backdrop is a 96-pixel copy of one cover, held in the database. See ADR 0005 and ADR 0006.
   if (!showGate) return children;
 
   return (
