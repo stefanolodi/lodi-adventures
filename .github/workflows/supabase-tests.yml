@@ -1,0 +1,30 @@
+name: Supabase tests
+
+# Runs the pgTAP tests in supabase/tests/ against a local stack built from supabase/migrations/.
+# It never touches the live project. See ADR 0005.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: ['supabase/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-tests-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  database-tests:
+    name: Database tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The same CLI version as supabase-migrations.yml.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.90.0
+      # Auth, the REST API and the gateway stay up, so a bad auth hook setting in config.toml
+      # fails the start.
+      - run: supabase start -x studio,imgproxy,mailpit,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor
+      - run: supabase test db
