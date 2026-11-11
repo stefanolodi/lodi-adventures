@@ -34,7 +34,7 @@ export default defineConfig(
     }
   },
   {
-    files: ['api/**/*.ts'],
+    files: ['api/**/*.ts', 'scripts/**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       globals: globals.node,

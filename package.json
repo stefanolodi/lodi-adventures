@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && tsc --noEmit -p api && vite build",
+    "build": "tsc --noEmit && tsc --noEmit -p api && tsc --noEmit -p scripts && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "screenshot": "node screenshot.mjs",
-    "lint": "eslint --max-warnings 0 src api",
+    "rename-photos": "node --env-file=.env.local scripts/rename-photos.ts",
+    "lint": "eslint --max-warnings 0 src api scripts",
     "verify": "npm run lint && npm run build && npm run test"
   },
   "repository": {

@@ -24,6 +24,8 @@ A guest can share a photo URL, and anyone with the URL sees the photo. A guest c
 
 Access is all or nothing. Every guest sees every public album, and revoking one guest means revoking them all.
 
+Cloudinary serves an `upload` asset to anyone who has its URL, so a URL read while the anon key could list photos keeps working after the gate change. `npm run rename-photos -- --apply` moves every photo and cover to a new random public id in the same folder, with `invalidate: true`, and points the rows at the new URL. Every URL handed out before the run then returns 404. The owner runs it again if a guest leaks a URL. It reads `SUPABASE_SERVICE_ROLE_KEY` from `.env.local` on the owner's Mac, and that key never goes to Vercel.
+
 A guest who has not visited for 90 to 97 days sees the gate again, because the cleanup runs once a week.
 
 While the gate shows, `GateLock` mounts nothing behind it, so a stranger loads no album data and no photos. Removing the overlay in dev tools reveals an empty page.
